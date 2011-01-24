@@ -1,10 +1,10 @@
-Copyright (C) 2008-2010.  Scott Livingston  <slivingston@caltech.edu>
+Copyright (C) 2008-2011.  Scott Livingston  <slivingston@caltech.edu>
 
 
 Everything in this directory, unless noted otherwise is released under
-the GNU General Public License, version 3 (or "GNU GPLv3"). A copy is
-included in the file GPLv3.txt in this repository. The FSF's website
-for the license is http://www.gnu.org/licenses/gpl.html
+the Lesser GNU General Public License, version 3 (or "GNU LGPLv3").
+A copy is included in the file LICENSE.txt in this repository. The
+FSF's website for the license is http://www.gnu.org/licenses/lgpl.html
 
 
 Here you will find sundry code, some of which is referenced on my website,
