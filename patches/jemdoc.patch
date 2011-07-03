@@ -1,0 +1,23 @@
+--- jemdoc.py.orig	2011-07-03 15:13:12.000000000 -0700
++++ jemdoc.py	2011-07-03 15:16:14.000000000 -0700
+@@ -4,6 +4,9 @@
+ 
+ # Copyright (C) 2007-2011 Jacob Mattingley (jacobm@stanford.edu).
+ #
++# Modification by SCL <slivingston@caltech.edu>,
++# to add abbreviation tag.
++#
+ # This file is part of jemdoc.
+ #
+ # jemdoc is free software; you can redistribute it and/or modify it under the
+@@ -651,6 +654,10 @@
+   b = b.lstrip('-. \t') # remove leading spaces, tabs, dashes, dots.
+   b = replaceimages(b) # jem not sure if this is still used.
+ 
++  # Insert abbreviation/acronym; using format of [["United Nations" UN]]
++  r = re.compile(r'(?<!\\)\[\[\s*\"(.*?)\"\s*(.*?)(?<!\\)\]\]', re.M + re.S)
++  b = re.sub(r, r'{{<abbr title="\1">\2</abbr>}}', b)
++
+   # Slightly nasty hackery in this next bit.
+   b = replacepercents(b)
+   b = replacelinks(b)
