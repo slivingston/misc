@@ -41,6 +41,7 @@ p#footer {
   <br />
   <input type="radio" name="output" value="automaton" checked="" />textual representation (cf. <a href="http://www.ltl2dstar.de/docs/ltl2dstar.html#output-format">grammar</a>)<br />
   <input type="radio" name="output" value="dot" />dot description<br />
+  <input type="checkbox" name="state_detail" />detailed states<br />
   <input type="checkbox" name="gen_image" />generate graph
 </form>
 <hr />
@@ -63,8 +64,15 @@ p#footer {
      $out_fname = tempnam(".", "wrapltl_tmp_out_");
      file_put_contents($fname, $_POST["ltl2dstar_formula"]);
 
+     // Show detailed states?
+     if (isset($_POST["state_detail"])) {
+         $state_detail_flag = "yes";
+     } else {
+         $state_detail_flag = "no";
+     }
+
      // Call ltl2dstar, with appropriate options.
-     $sys_result = system("/home/slivings/opt/bin/ltl2dstar --ltl2nba=spin:/home/slivings/opt/bin/ltl2ba --automata=" . $_POST["automata"] . " --output=" . $_POST["output"] . " " . $fname." ".$out_fname);
+     $sys_result = system("/home/slivings/opt/bin/ltl2dstar --ltl2nba=spin:/home/slivings/opt/bin/ltl2ba --automata=" . $_POST["automata"] . " --detailed-states=" . $state_detail_flag . " --output=" . $_POST["output"] . " " . $fname." ".$out_fname);
 
      // Output result
      $result = file_get_contents($out_fname);
@@ -72,11 +80,19 @@ p#footer {
 
      // Generate Graphviz image
      if (isset($_POST["gen_image"])) {
-	 foreach (glob("tmp/*") as $tmp_img) {
-             unlink($tmp_img);
+         $tmp_files = glob("tmp/*", GLOB_NOSORT);
+         if (count($tmp_files) > 5) {
+             $tmp_count = count($tmp_files);
+             $num_deleted = 0;
+             foreach ($tmp_files as $tmp_img) {
+                 unlink($tmp_img);
+                 $num_deleted++;
+                 if ($tmp_count - $num_deleted < 5)
+                     break;
+             }
          }
 	 $img_fname = "tmp/" . (string)rand() . ".png";
-         $sys_result = system("/home/slivings/opt/bin/ltl2dstar --ltl2nba=spin:/home/slivings/opt/bin/ltl2ba --automata=" . $_POST["automata"] . " --output=dot " . $fname." ".$out_fname);
+         $sys_result = system("/home/slivings/opt/bin/ltl2dstar --ltl2nba=spin:/home/slivings/opt/bin/ltl2ba --automata=" . $_POST["automata"] . " --detailed-states=" . $state_detail_flag . " --output=dot " . $fname." ".$out_fname);
          $sys_result = system("/home/slivings/opt/bin/dot ".$out_fname." -Tpng -o ".$img_fname);
          ?></pre><img src="<?php echo $img_fname; ?>" /><pre><?php
      }
