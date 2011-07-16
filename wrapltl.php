@@ -51,7 +51,7 @@ p#footer {
 <pre>
 <?php
    if (isset($_POST["ltl2ba_formula"])) {
-     $result = system("/home/slivings/opt/bin/ltl2ba -f '".$_POST["ltl2ba_formula"]."'");
+     $result = system("/home/slivings/opt/bin/ltl2ba -f " . escapeshellarg($_POST["ltl2ba_formula"]));
      $result[strlen($result)-1]="";
      echo $result;
    } elseif (isset($_POST["ltl2dstar_formula"])) {
