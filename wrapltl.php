@@ -39,7 +39,7 @@ p#footer {
   <input type="radio" name="automata" value="rabin" checked="" />Rabin<br />
   <input type="radio" name="automata" value="streett" />Streett
   <br />
-  <input type="radio" name="output" value="automaton" checked="" />textual representation (cf. <a href="http://www.ltl2dstar.de/docs/ltl2dstar.html#output-format">grammar definition</a>)<br />
+  <input type="radio" name="output" value="automaton" checked="" />textual representation (cf. <a href="http://www.ltl2dstar.de/docs/ltl2dstar.html#output-format">grammar</a>)<br />
   <input type="radio" name="output" value="dot" />dot description<br />
   <input type="checkbox" name="gen_image" />generate graph
 </form>
@@ -70,16 +70,16 @@ p#footer {
      $result = file_get_contents($out_fname);
      echo $result;
 
-/*
      // Generate Graphviz image
      if (isset($_POST["gen_image"])) {
-         $img_fname = tempnam(".", "wrapltl_img_");
+	 foreach (glob("tmp/*") as $tmp_img) {
+             unlink($tmp_img);
+         }
+	 $img_fname = "tmp/" . (string)rand() . ".png";
          $sys_result = system("/home/slivings/opt/bin/ltl2dstar --ltl2nba=spin:/home/slivings/opt/bin/ltl2ba --automata=" . $_POST["automata"] . " --output=dot " . $fname." ".$out_fname);
-         $sys_result = system("/home/slivings/opt/bin/dot -Tpng -o ".$img_fname." ".$out_fname);
-         http_send_file($img_fname);
-         ?></pre><img src="<?php $img_fname ?>" /><pre><?php
+         $sys_result = system("/home/slivings/opt/bin/dot ".$out_fname." -Tpng -o ".$img_fname);
+         ?></pre><img src="<?php echo $img_fname; ?>" /><pre><?php
      }
-*/
 
      // Delete temporary files.
      unlink($fname);
