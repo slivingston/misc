@@ -8,7 +8,7 @@
 #   POP/IMAP" of your gmail settings.
 #
 #
-# Scott Livingston <slivingston@caltech.edu>. Copyright 2008.
+# Scott C. Livingston <slivingston@caltech.edu>. Copyright 2008.
 #
 # First released: 19 January 2008
 # Updated: 29 August 2008
@@ -39,10 +39,10 @@ Archive all mail retrieved from gmail through POP3. Output is an archive\n\
 compressed using TAR and GZIP and name NAME.tar.gz. If no argument is given,\n\
 then default name of USERNAME_gmail_archive-YYYYMMDD is used, where USERNAME\n\
 is your gmail username and YYYYMMDD is the current date.\n\n\
-Scott Livingston. Copyright 2008.\n\
+Scott C. Livingston. Copyright 2008.\n\
 This program is free software; it is released WITHOUT ANY WARRANY and under\n\
-the GNU General Public License, version 3. See GPLv3.txt (distributed with\n\
-this script) or visit http://www.gnu.org/licenses/gpl.html for exact terms.\n"
+the GNU Lesser General Public License, version 3. See LICENSE.txt (distributed\n\
+with this script) or visit http://www.gnu.org/licenses/lgpl.html for exact terms.\n"
     exit()
 elif len(sys.argv) == 2:
     # handle a help request
@@ -52,10 +52,10 @@ Archive all mail retrieved from gmail through POP3. Output is an archive\n\
 compressed using TAR and GZIP and name NAME.tar.gz. If no argument is given,\n\
 then default name of USERNAME_gmail_archive-YYYYMMDD is used, where USERNAME\n\
 is your gmail username and YYYYMMDD is the current date.\n\n\
-Scott Livingston. Copyright 2008.\n\
+Scott C. Livingston. Copyright 2008.\n\
 This program is free software; it is released WITHOUT ANY WARRANY and under\n\
-the GNU General Public License, version 3. See GPLv3.txt (distributed with\n\
-this script) or visit http://www.gnu.org/licenses/gpl.html for exact terms.\n"
+the GNU Lesser General Public License, version 3. See LICENSE.txt (distributed\n\
+with this script) or visit http://www.gnu.org/licenses/lgpl.html for exact terms.\n"
         exit()
     name = sys.argv[1]
 else:
