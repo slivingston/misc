@@ -1,4 +1,4 @@
-Copyright (C) 2008-2011.  Scott C. Livingston  <slivingston@caltech.edu>
+Copyright (C) 2008-2012.  Scott C. Livingston  <slivingston@caltech.edu>
 
 
 Everything in this directory, unless noted otherwise is released under
