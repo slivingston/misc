@@ -39,7 +39,7 @@ with other LTL-to-NBA translators, I assume here ltl2ba
 (http://www.lsv.ens-cachan.fr/~gastin/ltl2ba/) by Denis Oddoux and Paul Gastin.
 If graph images are going to be generated, then the dot program, which is part
 of Graphviz (http://www.graphviz.org/), must also be installed.  The code below
-assumes all required executable binaries are in the directory BIN_PATH (cf. line 102).
+assumes all required executable binaries are in the directory BIN_PATH (cf. line 103).
 
 SCL <slivingston@cds.caltech.edu>, 19 May 2013.
 
@@ -88,8 +88,9 @@ p#footer {
   <br />
   <input type="radio" name="output" value="automaton" checked="" />textual representation (cf. <a href="http://www.ltl2dstar.de/docs/ltl2dstar.html#output-format">grammar</a>)<br />
   <input type="radio" name="output" value="dot" />dot description<br />
-  <input type="checkbox" name="stutter_translate" checked="" /><a href="http://www.ltl2dstar.de/docs/ltl2dstar.html#stuttering">stuttering translation</a><br />
-  <input type="checkbox" name="partial_stutter_translate" />partial stuttering translation for formulae not completely insensitive to stuttering<br />
+  <input type="checkbox" name="variousopt" checked="" />heuristics to reduce automaton size (cf. <a href="#notes">notes below</a>)<br />
+  <input type="checkbox" name="stutter_translate" checked="" /><a href="http://www.ltl2dstar.de/docs/ltl2dstar.html#stuttering">stuttered translation</a> (cf. <a href="#notes">notes below</a>)<br />
+  <input type="checkbox" name="partial_stutter_translate" />partial stuttered translation for formulae not completely insensitive to stuttering<br />
   <input type="checkbox" name="state_detail" />detailed states<br />
   <input type="checkbox" name="gen_image" />generate graph
 </form>
@@ -115,6 +116,13 @@ p#footer {
      $out_fname = tempnam(".", "wrapltl_tmp_out_");
      file_put_contents($fname, $_POST["ltl2dstar_formula"]);
 
+     // Disable the various heuristics?
+     if (!isset($_POST["variousopt"])) {
+         $variousopt_str = "--safra=none --bisimulation=no --opt-acceptance=no --union=no";
+     } else {
+         $variousopt_str = "";
+     }
+
      // Enable the stuttering translation for insensitive formulae?
      if (isset($_POST["stutter_translate"])) {
          $stutter_flag = "yes";
@@ -137,7 +145,7 @@ p#footer {
      }
 
      // Call ltl2dstar, with appropriate options.
-     $sys_result = system($BIN_PATH . "/ltl2dstar --ltl2nba=spin:" . $BIN_PATH . "/ltl2ba --stutter=" . $stutter_flag . " --partial-stutter=" . $partial_stutter_flag . " --automata=" . escapeshellarg($_POST["automata"]) . " --detailed-states=" . $state_detail_flag . " --output=" . escapeshellarg($_POST["output"]) . " " . $fname." ".$out_fname);
+     $sys_result = system($BIN_PATH . "/ltl2dstar " . $variousopt_str . " --ltl2nba=spin:" . $BIN_PATH . "/ltl2ba --stutter=" . $stutter_flag . " --partial-stutter=" . $partial_stutter_flag . " --automata=" . escapeshellarg($_POST["automata"]) . " --detailed-states=" . $state_detail_flag . " --output=" . escapeshellarg($_POST["output"]) . " " . $fname." ".$out_fname);
 
      // Output result
      $result = file_get_contents($out_fname);
@@ -157,7 +165,7 @@ p#footer {
              }
          }
 	 $img_fname = "tmp/" . (string)rand() . ".png";
-         $sys_result = system($BIN_PATH . "/ltl2dstar --ltl2nba=spin:" . $BIN_PATH . "/ltl2ba --stutter=" . $stutter_flag . " --partial-stutter=" . $partial_stutter_flag . " --automata=" . escapeshellarg($_POST["automata"]) . " --detailed-states=" . $state_detail_flag . " --output=dot " . $fname." ".$out_fname);
+         $sys_result = system($BIN_PATH . "/ltl2dstar " . $variousopt_str . " --ltl2nba=spin:" . $BIN_PATH . "/ltl2ba --stutter=" . $stutter_flag . " --partial-stutter=" . $partial_stutter_flag . " --automata=" . escapeshellarg($_POST["automata"]) . " --detailed-states=" . $state_detail_flag . " --output=dot " . $fname." ".$out_fname);
          $sys_result = system($BIN_PATH . "/dot ".$out_fname." -Tpng -o ".$img_fname);
          ?></pre><img src="<?php echo $img_fname; ?>" /><pre><?php
      }
@@ -170,10 +178,12 @@ p#footer {
 </pre>
 </p>
 
-<p>
+<p id="notes">
 <em>Notes.</em>
 <ul>
   <li><a href="http://www.ltl2dstar.de/docs/ltl2dstar.html#ltl-formulas">the input grammar</a> of ltl2dstar;</li>
+  <li><a href="http://www.ltl2dstar.de/docs/ltl2dstar.html#cmdline">the various "optimization" options</a> are described in <a href="http://dx.doi.org/10.1016/j.tcs.2006.07.022">(Klein and Baier, 2006)</a> and <a href="http://www.ltl2dstar.de/literature/ltl2dstar-diploma-thesis.pdf">Joachim Klein's diploma thesis</a>;</li>
+  <li>the stuttered translation is described in <a href="http://dx.doi.org/10.1007/978-3-540-76336-9_7">(Klein and Baier, 2007)</a>;</li>
   <li>graphs are generated using <a href="http://graphviz.org/">Graphviz</a>;</li>
   <li>if execution fails, then output is empty (i.e. no translation!);</li>
 </ul>
