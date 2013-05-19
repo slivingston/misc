@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (c) 2011, Scott C. Livingston
+Copyright (c) 2011, 2013, Scott C. Livingston
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -29,6 +29,20 @@ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+/* Introduction:
+
+The primary purpose of wrapltl.php is to provide a Web interface to Joachim
+Klein's ltl2dstar (http://www.ltl2dstar.de/) tool.  While ltl2dstar can work
+with other LTL-to-NBA translators, I assume here ltl2ba
+(http://www.lsv.ens-cachan.fr/~gastin/ltl2ba/) by Denis Oddoux and Paul Gastin.
+If graph images are going to be generated, then the dot program, which is part
+of Graphviz (http://www.graphviz.org/), must also be installed.  The code below
+assumes all required executable binaries are in the directory BIN_PATH (cf. line 102).
+
+SCL <slivingston@cds.caltech.edu>, 19 May 2013.
+
 */
 ?>
 <!DOCTYPE html
@@ -66,7 +80,7 @@ p#footer {
 </form>
 <hr />
 <form action="wrapltl.php" method="POST">
-  LTL(<a href="http://www.ltl2dstar.de/">2DSTAR</a>) formula: <input type="text" name="ltl2dstar_formula" size="32" maxlength="255" <? if (isset($_POST["ltl2dstar_formula"])) { echo " value=\"".$_POST["ltl2dstar_formula"]."\" "; } ?> />
+  LTL(<a href="http://www.ltl2dstar.de/">2DSTAR</a>) formula: <input type="text" name="ltl2dstar_formula" size="32" maxlength="255" <? if (isset($_POST["ltl2dstar_formula"]) && (strpos($_POST["ltl2dstar_formula"], '<') == FALSE && strpos($_POST["ltl2dstar_formula"], '>') == FALSE)) { echo " value=\"".$_POST["ltl2dstar_formula"]."\" "; } ?> />
   <input type="submit" name="submit" />
   <br />
   <input type="radio" name="automata" value="rabin" checked="" />Rabin<br />
@@ -74,6 +88,8 @@ p#footer {
   <br />
   <input type="radio" name="output" value="automaton" checked="" />textual representation (cf. <a href="http://www.ltl2dstar.de/docs/ltl2dstar.html#output-format">grammar</a>)<br />
   <input type="radio" name="output" value="dot" />dot description<br />
+  <input type="checkbox" name="stutter_translate" checked="" /><a href="http://www.ltl2dstar.de/docs/ltl2dstar.html#stuttering">stuttering translation</a><br />
+  <input type="checkbox" name="partial_stutter_translate" />partial stuttering translation for formulae not completely insensitive to stuttering<br />
   <input type="checkbox" name="state_detail" />detailed states<br />
   <input type="checkbox" name="gen_image" />generate graph
 </form>
@@ -83,11 +99,13 @@ p#footer {
 <p>
 <pre>
 <?php
-   if (isset($_POST["ltl2ba_formula"])) {
-     $result = system("/home/slivings/opt/bin/ltl2ba -f " . escapeshellarg($_POST["ltl2ba_formula"]));
+   $BIN_PATH = "/home/slivings/opt/bin";
+
+   if (isset($_POST["ltl2ba_formula"]) && (strpos($_POST["ltl2ba_formula"], '<') == FALSE && strpos($_POST["ltl2ba_formula"], '>') == FALSE)) {
+     $result = system($BIN_PATH . "/ltl2ba -f " . escapeshellarg($_POST["ltl2ba_formula"]));
      $result[strlen($result)-1]="";
      echo $result;
-   } elseif (isset($_POST["ltl2dstar_formula"])) {
+   } elseif (isset($_POST["ltl2dstar_formula"]) && (strpos($_POST["ltl2dstar_formula"], '<') == FALSE && strpos($_POST["ltl2dstar_formula"], '>') == FALSE)) {
 
      // Echo the formula, for completeness...
      echo $_POST["ltl2dstar_formula"];?></pre><hr /><pre><?php
@@ -97,6 +115,20 @@ p#footer {
      $out_fname = tempnam(".", "wrapltl_tmp_out_");
      file_put_contents($fname, $_POST["ltl2dstar_formula"]);
 
+     // Enable the stuttering translation for insensitive formulae?
+     if (isset($_POST["stutter_translate"])) {
+         $stutter_flag = "yes";
+     } else {
+         $stutter_flag = "no";
+     }
+
+     // Enable the stuttering translation for incompletely insensitive formulae?
+     if (isset($_POST["partial_stutter_translate"])) {
+         $partial_stutter_flag = "yes";
+     } else {
+         $partial_stutter_flag = "no";
+     }
+
      // Show detailed states?
      if (isset($_POST["state_detail"])) {
          $state_detail_flag = "yes";
@@ -105,7 +137,7 @@ p#footer {
      }
 
      // Call ltl2dstar, with appropriate options.
-     $sys_result = system("/home/slivings/opt/bin/ltl2dstar --ltl2nba=spin:/home/slivings/opt/bin/ltl2ba --automata=" . $_POST["automata"] . " --detailed-states=" . $state_detail_flag . " --output=" . $_POST["output"] . " " . $fname." ".$out_fname);
+     $sys_result = system($BIN_PATH . "/ltl2dstar --ltl2nba=spin:" . $BIN_PATH . "/ltl2ba --stutter=" . $stutter_flag . " --partial-stutter=" . $partial_stutter_flag . " --automata=" . escapeshellarg($_POST["automata"]) . " --detailed-states=" . $state_detail_flag . " --output=" . escapeshellarg($_POST["output"]) . " " . $fname." ".$out_fname);
 
      // Output result
      $result = file_get_contents($out_fname);
@@ -125,8 +157,8 @@ p#footer {
              }
          }
 	 $img_fname = "tmp/" . (string)rand() . ".png";
-         $sys_result = system("/home/slivings/opt/bin/ltl2dstar --ltl2nba=spin:/home/slivings/opt/bin/ltl2ba --automata=" . $_POST["automata"] . " --detailed-states=" . $state_detail_flag . " --output=dot " . $fname." ".$out_fname);
-         $sys_result = system("/home/slivings/opt/bin/dot ".$out_fname." -Tpng -o ".$img_fname);
+         $sys_result = system($BIN_PATH . "/ltl2dstar --ltl2nba=spin:" . $BIN_PATH . "/ltl2ba --stutter=" . $stutter_flag . " --partial-stutter=" . $partial_stutter_flag . " --automata=" . escapeshellarg($_POST["automata"]) . " --detailed-states=" . $state_detail_flag . " --output=dot " . $fname." ".$out_fname);
+         $sys_result = system($BIN_PATH . "/dot ".$out_fname." -Tpng -o ".$img_fname);
          ?></pre><img src="<?php echo $img_fname; ?>" /><pre><?php
      }
 
@@ -148,7 +180,7 @@ p#footer {
 </p>
 
 <p id="footer">
-<a href="http://scottman.net">Scott C. Livingston</a>, 2011.
+<a href="http://scottman.net">Scott C. Livingston</a>, 2011, 2013.
 </p>
 </body>
 </html>
