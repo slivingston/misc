@@ -41,7 +41,7 @@ If graph images are going to be generated, then the dot program, which is part
 of Graphviz (http://www.graphviz.org/), must also be installed.  The code below
 assumes all required executable binaries are in the directory BIN_PATH (cf. line 103).
 
-SCL <slivingston@cds.caltech.edu>, 19 May 2013.
+SCL <slivingston@cds.caltech.edu>, 3 Sep 2013.
 
 */
 ?>
@@ -80,7 +80,7 @@ p#footer {
 </form>
 <hr />
 <form action="wrapltl.php" method="POST">
-  LTL(<a href="http://www.ltl2dstar.de/">2DSTAR</a>) formula: <input type="text" name="ltl2dstar_formula" size="32" maxlength="255" <? if (isset($_POST["ltl2dstar_formula"]) && (strpos($_POST["ltl2dstar_formula"], '<') == FALSE && strpos($_POST["ltl2dstar_formula"], '>') == FALSE)) { echo " value=\"".$_POST["ltl2dstar_formula"]."\" "; } ?> />
+  LTL(<a href="http://www.ltl2dstar.de/">2DSTAR</a>) formula: <input type="text" name="ltl2dstar_formula" size="32" maxlength="255" <? if (isset($_POST["ltl2dstar_formula"]) && (strpos($_POST["ltl2dstar_formula"], '<') === FALSE && strpos($_POST["ltl2dstar_formula"], '>') === FALSE)) { echo " value=\"".$_POST["ltl2dstar_formula"]."\" "; } ?> />
   <input type="submit" name="submit" />
   <br />
   <input type="radio" name="automata" value="rabin" checked="" />Rabin<br />
@@ -102,11 +102,26 @@ p#footer {
 <?php
    $BIN_PATH = "/home/slivings/opt/bin";
 
-   if (isset($_POST["ltl2ba_formula"]) && (strpos($_POST["ltl2ba_formula"], '<') == FALSE && strpos($_POST["ltl2ba_formula"], '>') == FALSE)) {
-     $result = system($BIN_PATH . "/ltl2ba -f " . escapeshellarg($_POST["ltl2ba_formula"]));
-     $result[strlen($result)-1]="";
-     echo $result;
-   } elseif (isset($_POST["ltl2dstar_formula"]) && (strpos($_POST["ltl2dstar_formula"], '<') == FALSE && strpos($_POST["ltl2dstar_formula"], '>') == FALSE)) {
+   if (isset($_POST["ltl2ba_formula"])) {
+     $ltl2ba_form_len = strlen($_POST["ltl2ba_formula"]);
+     $offset = 0;
+     $incorrect_angles = FALSE;
+     while ($offset < $ltl2ba_form_len) {
+         $pos = strpos($_POST["ltl2ba_formula"], "<", $offset);
+         if ($pos === FALSE)
+             break;
+         if ((strpos($_POST["ltl2ba_formula"], "<>", $offset) !== $pos) && (strpos($_POST["ltl2ba_formula"], "<->", $offset) !== $pos)) {
+             $incorrect_angles = TRUE;
+             break;
+         }
+         $offset = ($pos)+1;
+     }
+     if (!$incorrect_angles) {
+         $result = system($BIN_PATH . "/ltl2ba -f " . escapeshellarg($_POST["ltl2ba_formula"]));
+         $result[strlen($result)-1]="";
+         echo $result;
+     }
+   } elseif (isset($_POST["ltl2dstar_formula"]) && (strpos($_POST["ltl2dstar_formula"], '<') === FALSE && strpos($_POST["ltl2dstar_formula"], '>') === FALSE)) {
 
      // Echo the formula, for completeness...
      echo $_POST["ltl2dstar_formula"];?></pre><hr /><pre><?php
@@ -186,6 +201,7 @@ p#footer {
   <li>the stuttered translation is described in <a href="http://dx.doi.org/10.1007/978-3-540-76336-9_7">(Klein and Baier, 2007)</a>;</li>
   <li>graphs are generated using <a href="http://graphviz.org/">Graphviz</a>;</li>
   <li>if execution fails, then output is empty (i.e. no translation!);</li>
+  <li><a href="https://github.com/slivingston/misc/blob/master/wrapltl.php">the code</a> is available in Scott's <a href="http://scottman.net/misc.html">misc</a> <a href="https://github.com/slivingston/misc">repo</a>;
 </ul>
 </p>
 
