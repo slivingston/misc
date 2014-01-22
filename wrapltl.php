@@ -1,6 +1,6 @@
 <?php
 /*
-Copyright (c) 2011, 2013, Scott C. Livingston
+Copyright (c) 2011, 2013, 2014 Scott C. Livingston
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -100,10 +100,19 @@ p#footer {
 <p>
 <pre>
 <?php
-   $BIN_PATH = "/home/slivings/opt/bin";
+   $BIN_PATH = "/home/scott/opt/bin";
+
+   if ((isset($_POST["ltl2dstar_formula"]) && strlen($_POST["ltl2dstar_formula"]) > 255)
+       || (isset($_POST["output"]) && strlen($_POST["output"]) > 10)
+       || (isset($_POST["automata"]) && strlen($_POST["automata"]) > 7)) {
+     exit(1);
+   }
 
    if (isset($_POST["ltl2ba_formula"])) {
      $ltl2ba_form_len = strlen($_POST["ltl2ba_formula"]);
+     if ($ltl2ba_form_len > 255) {
+         exit(1);
+     }
      $offset = 0;
      $incorrect_angles = FALSE;
      while ($offset < $ltl2ba_form_len) {
